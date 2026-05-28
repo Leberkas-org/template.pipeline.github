@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.0](https://github.com/Leberkas-org/template.pipeline.github/compare/v0.5.0...v0.6.0) (2026-05-28)
+
+
+### Features
+
+* **ci:** Add locked-mode to dotnet restore ([8f511be](https://github.com/Leberkas-org/template.pipeline.github/commit/8f511be7d3a4b62b5a69358788519e188e11aa58))
+* **ci:** Make dotnet-setup working directory configurable ([e7dfcf3](https://github.com/Leberkas-org/template.pipeline.github/commit/e7dfcf319a006f21d0520e8532f8f846a4e6b484))
+
 ## [0.5.0](https://github.com/Leberkas-org/template.pipeline.github/compare/v0.4.0...v0.5.0) (2026-05-28)
 
 
