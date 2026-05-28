@@ -32,6 +32,25 @@ on:
         required: false
         type: string
         default: ""
+      sonar-enabled:
+        description: "Enable SonarCloud analysis"
+        required: false
+        type: boolean
+        default: false
+      sonar-project-key:
+        description: "SonarCloud project key (required if sonar-enabled)"
+        required: false
+        type: string
+        default: ""
+      sonar-organization:
+        description: "SonarCloud organization (required if sonar-enabled)"
+        required: false
+        type: string
+        default: ""
+    secrets:
+      sonar-token:
+        description: "SonarCloud authentication token (required if sonar-enabled)"
+        required: false
 
 permissions:
   contents: read
@@ -51,7 +70,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          fetch-depth: 1
+          fetch-depth: ${{ inputs.sonar-enabled && 0 || 1 }}
 
       - name: Install extra apt packages
         if: inputs.extra-apt-packages != ''
@@ -64,6 +83,20 @@ jobs:
         with:
           global-json-file: ${{ inputs.dotnet-version-file }}
           solution-path: ${{ inputs.solution-path }}
+
+      - name: Install SonarScanner
+        if: inputs.sonar-enabled
+        run: dotnet tool install --global dotnet-sonarscanner
+
+      - name: Begin SonarCloud analysis
+        if: inputs.sonar-enabled
+        run: >
+          dotnet sonarscanner begin
+          /k:"${{ inputs.sonar-project-key }}"
+          /o:"${{ inputs.sonar-organization }}"
+          /d:sonar.token="${{ secrets.sonar-token }}"
+          /d:sonar.host.url="https://sonarcloud.io"
+          /d:sonar.cs.opencover.reportsPaths="${{ github.workspace }}/${{ inputs.test-result-directory }}/*cobertura.xml"
 
       - name: Build
         run: >
@@ -94,3 +127,9 @@ jobs:
       - name: Add coverage to job summary
         if: always() && inputs.coverage-enabled
         run: cat ./coveragereport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
+
+      - name: End SonarCloud analysis
+        if: inputs.sonar-enabled
+        run: >
+          dotnet sonarscanner end
+          /d:sonar.token="${{ secrets.sonar-token }}"

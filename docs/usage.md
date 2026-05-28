@@ -32,6 +32,28 @@ jobs:
 | `coverage-enabled` | no | `true` | Generate coverage reports |
 | `test-result-directory` | no | `testresults` | Test output directory |
 | `extra-apt-packages` | no | `""` | Extra apt packages (e.g. `libmsquic`) |
+| `sonar-enabled` | no | `false` | Enable SonarCloud analysis |
+| `sonar-project-key` | no | `""` | SonarCloud project key |
+| `sonar-organization` | no | `""` | SonarCloud organization |
+
+**Secrets:**
+| Secret | Required | Description |
+|--------|----------|-------------|
+| `sonar-token` | if sonar-enabled | SonarCloud authentication token |
+
+**Usage with SonarCloud:**
+```yaml
+jobs:
+  build:
+    uses: Leberkas-org/template.pipeline.github/.github/workflows/build-test.yml@v1
+    with:
+      solution-path: ./src/MyProject.slnx
+      sonar-enabled: true
+      sonar-project-key: my-org_my-project
+      sonar-organization: my-org
+    secrets:
+      sonar-token: ${{ secrets.SONAR_TOKEN }}
+```
 
 ---
 
@@ -165,6 +187,41 @@ jobs:
 | `nuget-username` | if nuget-trusted-publishing | NuGet.org username |
 | `registry-username` | if docker-publish | Registry username |
 | `registry-password` | if docker-publish | Registry password |
+
+---
+
+### sonar.yml
+
+Run SonarCloud analysis with code coverage integration.
+
+**Usage:**
+```yaml
+jobs:
+  sonar:
+    uses: Leberkas-org/template.pipeline.github/.github/workflows/sonar.yml@v1
+    with:
+      solution-path: ./src/MyProject.slnx
+      sonar-project-key: my-org_my-project
+      sonar-organization: my-org
+    secrets:
+      sonar-token: ${{ secrets.SONAR_TOKEN }}
+```
+
+**Inputs:**
+| Input | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `dotnet-version-file` | no | `./src/global.json` | Path to global.json |
+| `solution-path` | **yes** | — | Path to .slnx or .sln |
+| `sonar-project-key` | **yes** | — | SonarCloud project key |
+| `sonar-organization` | **yes** | — | SonarCloud organization |
+| `build-configuration` | no | `Release` | Build configuration |
+| `test-result-directory` | no | `testresults` | Test output directory |
+| `extra-apt-packages` | no | `""` | Extra apt packages (e.g. `libmsquic`) |
+
+**Secrets:**
+| Secret | Required | Description |
+|--------|----------|-------------|
+| `sonar-token` | **yes** | SonarCloud authentication token |
 
 ---
 
