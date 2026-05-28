@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.2](https://github.com/Leberkas-org/template.pipeline.github/compare/v0.7.1...v0.7.2) (2026-05-28)
+
+
+### CI/CD
+
+* Prepend github.workspace to artifact paths ([a362fdf](https://github.com/Leberkas-org/template.pipeline.github/commit/a362fdf4439fe56e55d95ccfe44bbb8628c032b6))
+
 ## [0.7.1](https://github.com/Leberkas-org/template.pipeline.github/compare/v0.7.0...v0.7.1) (2026-05-28)
 
 
