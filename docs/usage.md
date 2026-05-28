@@ -1,0 +1,204 @@
+# Usage Guide
+
+Detailed reference for all workflows and actions in this pipeline library.
+
+## Prerequisites
+
+- Repository must be in the `Leberkas-org` GitHub organization (or fork this repo for your own org)
+- Copy starter files from `starter/` directory to your repo root
+- Commit messages must follow [Conventional Commits](https://www.conventionalcommits.org/) format
+
+## Workflow Reference
+
+### build-test.yml
+
+Build and test a .NET solution with optional code coverage.
+
+**Usage:**
+```yaml
+jobs:
+  build:
+    uses: Leberkas-org/template.pipeline.github/.github/workflows/build-test.yml@v1
+    with:
+      solution-path: ./src/MyProject.slnx
+```
+
+**Inputs:**
+| Input | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `dotnet-version-file` | no | `./src/global.json` | Path to global.json |
+| `solution-path` | **yes** | — | Path to .slnx or .sln |
+| `build-configuration` | no | `Release` | Build configuration |
+| `coverage-enabled` | no | `true` | Generate coverage reports |
+| `test-result-directory` | no | `testresults` | Test output directory |
+| `extra-apt-packages` | no | `""` | Extra apt packages (e.g. `libmsquic`) |
+
+---
+
+### nuget-publish.yml
+
+Pack and publish NuGet packages. Typically called by `release.yml`, not directly.
+
+**Inputs:**
+| Input | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `dotnet-version-file` | no | `./src/global.json` | Path to global.json |
+| `solution-path` | **yes** | — | Path to .slnx or .sln |
+| `version` | **yes** | — | SemVer version |
+| `tag-name` | **yes** | — | Git tag for release attachment |
+| `package-output-directory` | no | `./packages` | Output directory |
+| `nuget-source` | no | `https://api.nuget.org/v3/index.json` | NuGet feed URL |
+
+**Secrets:**
+| Secret | Required | Description |
+|--------|----------|-------------|
+| `nuget-api-key` | **yes** | NuGet.org API key |
+
+---
+
+### docker-build-push.yml
+
+Build and push Docker images. Typically called by `release.yml`, not directly.
+
+**Inputs:**
+| Input | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `dockerfile-path` | no | `./Dockerfile` | Path to Dockerfile |
+| `context` | no | `.` | Docker build context |
+| `image-name` | **yes** | — | Image name |
+| `registry` | no | `ghcr.io` | Registry URL |
+| `version` | **yes** | — | SemVer version |
+| `platforms` | no | `linux/amd64` | Target platforms |
+| `build-args` | no | `""` | Build arguments |
+
+**Secrets:**
+| Secret | Required | Description |
+|--------|----------|-------------|
+| `registry-username` | **yes** | Registry username |
+| `registry-password` | **yes** | Registry password/token |
+
+---
+
+### release.yml
+
+Orchestrates release-please, NuGet publishing, and Docker publishing.
+
+**Usage (NuGet only):**
+```yaml
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    uses: Leberkas-org/template.pipeline.github/.github/workflows/release.yml@v1
+    with:
+      nuget-publish: true
+      solution-path: ./src/MyProject.slnx
+    secrets:
+      nuget-api-key: ${{ secrets.NUGET_SECRET }}
+```
+
+**Usage (Docker only):**
+```yaml
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    uses: Leberkas-org/template.pipeline.github/.github/workflows/release.yml@v1
+    with:
+      docker-publish: true
+      docker-image-name: my-service
+      docker-registry: ghcr.io
+      dockerfile-path: ./src/MyService/Dockerfile
+    secrets:
+      registry-username: ${{ github.actor }}
+      registry-password: ${{ secrets.GITHUB_TOKEN }}
+```
+
+**Usage (Both):**
+```yaml
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    uses: Leberkas-org/template.pipeline.github/.github/workflows/release.yml@v1
+    with:
+      nuget-publish: true
+      docker-publish: true
+      solution-path: ./src/MyProject.slnx
+      docker-image-name: my-service
+    secrets:
+      nuget-api-key: ${{ secrets.NUGET_SECRET }}
+      registry-username: ${{ github.actor }}
+      registry-password: ${{ secrets.GITHUB_TOKEN }}
+```
+
+**Inputs:**
+| Input | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `nuget-publish` | no | `false` | Enable NuGet publishing |
+| `docker-publish` | no | `false` | Enable Docker publishing |
+| `dotnet-version-file` | no | `./src/global.json` | Path to global.json |
+| `solution-path` | no | `""` | Path to .slnx/.sln |
+| `dockerfile-path` | no | `./Dockerfile` | Path to Dockerfile |
+| `docker-registry` | no | `ghcr.io` | Container registry |
+| `docker-image-name` | no | `""` | Docker image name |
+| `docker-platforms` | no | `linux/amd64` | Target platforms |
+
+**Secrets:**
+| Secret | Required | Description |
+|--------|----------|-------------|
+| `nuget-api-key` | if nuget-publish | NuGet API key |
+| `registry-username` | if docker-publish | Registry username |
+| `registry-password` | if docker-publish | Registry password |
+
+---
+
+### commitlint.yml
+
+Validate PR titles and commit messages.
+
+**Usage:**
+```yaml
+jobs:
+  lint:
+    uses: Leberkas-org/template.pipeline.github/.github/workflows/commitlint.yml@v1
+```
+
+**Inputs:**
+| Input | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `commitlint-config-file` | no | `commitlint.config.mjs` | Path to commitlint config |
+
+## Starter Files
+
+Copy these from `starter/` to your repo root:
+
+| File | Purpose |
+|------|---------|
+| `commitlint.config.mjs` | Enforces Conventional Commits format |
+| `release-please-config.json` | Configures release-please changelog sections |
+| `.release-please-manifest.json` | Tracks current version (start at `0.1.0`) |
+
+## Versioning
+
+This library uses Git tags for versioning (`v1`, `v1.0.0`).
+
+- Pin to **major tag** for stability: `@v1`
+- Pin to **exact tag** for reproducibility: `@v1.0.0`
+- Pin to **branch** for development: `@main`
+
+## Commit Convention
+
+Consumer repos must use Conventional Commits:
+
+| Prefix | Version Bump | Example |
+|--------|-------------|---------|
+| `feat:` | Minor | `feat: add user export endpoint` |
+| `fix:` | Patch | `fix: correct date parsing in reports` |
+| `perf:` | Patch | `perf: cache database queries` |
+| `feat!:` or `BREAKING CHANGE:` | Major | `feat!: redesign auth API` |
+| `docs:`, `chore:`, `test:`, `ci:`, `build:` | None | `docs: update API reference` |
+| `deps:` | None | `deps: bump Akka to 1.5.70` |
+
+## Constraints
+
+- **Nesting limit:** GitHub allows max 4 levels of `workflow_call`. Consumer → release.yml → nuget/docker is 3 levels. Consumers have 1 more level available.
+- **Secrets:** Must be explicitly passed at each level. Use `secrets: inherit` only within the same organization.
+- **Path filters:** Add `paths-ignore` in your consumer workflow, not in the reusable workflows.
