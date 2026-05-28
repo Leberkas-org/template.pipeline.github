@@ -35,6 +35,16 @@ on:
         required: false
         type: boolean
         default: false
+      cache-enabled:
+        description: "Enable NuGet dependency caching (requires packages.lock.json files)"
+        required: false
+        type: boolean
+        default: true
+      cache-dependency-path:
+        description: "Glob pattern for NuGet cache key"
+        required: false
+        type: string
+        default: "**/packages.lock.json"
     secrets:
       nuget-api-key:
         description: "NuGet.org API key (not required when trusted-publishing is true)"
@@ -61,6 +71,8 @@ jobs:
         with:
           global-json-file: ${{ inputs.dotnet-version-file }}
           solution-path: ${{ inputs.solution-path }}
+          cache-enabled: ${{ inputs.cache-enabled && 'true' || 'false' }}
+          cache-dependency-path: ${{ inputs.cache-dependency-path }}
 
       - name: Build
         run: >

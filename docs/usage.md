@@ -32,6 +32,7 @@ jobs:
 | `coverage-enabled` | no | `true` | Generate coverage reports |
 | `test-result-directory` | no | `testresults` | Test output directory |
 | `extra-apt-packages` | no | `""` | Extra apt packages (e.g. `libmsquic`) |
+| `cache-enabled` | no | `true` | Enable NuGet dependency caching |
 | `sonar-enabled` | no | `false` | Enable SonarCloud analysis |
 | `sonar-project-key` | no | `""` | SonarCloud project key |
 | `sonar-organization` | no | `""` | SonarCloud organization |

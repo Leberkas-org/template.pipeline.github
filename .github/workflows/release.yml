@@ -68,6 +68,16 @@ on:
         required: false
         type: string
         default: "linux/amd64"
+      cache-enabled:
+        description: "Enable NuGet dependency caching (requires packages.lock.json files)"
+        required: false
+        type: boolean
+        default: true
+      cache-dependency-path:
+        description: "Glob pattern for NuGet cache key"
+        required: false
+        type: string
+        default: "**/packages.lock.json"
     secrets:
       nuget-api-key:
         description: "NuGet.org API key (required if nuget-publish without trusted publishing)"
@@ -114,6 +124,8 @@ jobs:
       version: ${{ needs.release-please.outputs.version }}
       tag-name: ${{ needs.release-please.outputs.tag_name }}
       trusted-publishing: ${{ inputs.nuget-trusted-publishing }}
+      cache-enabled: ${{ inputs.cache-enabled }}
+      cache-dependency-path: ${{ inputs.cache-dependency-path }}
     secrets:
       nuget-api-key: ${{ secrets.nuget-api-key }}
       nuget-username: ${{ secrets.nuget-username }}
