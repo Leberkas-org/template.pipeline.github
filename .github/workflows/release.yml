@@ -68,6 +68,11 @@ on:
         required: false
         type: string
         default: "linux/amd64"
+      locked-mode:
+        description: "Use --locked-mode for restore (fails if packages.lock.json is outdated)"
+        required: false
+        type: boolean
+        default: false
       cache-enabled:
         description: "Enable NuGet dependency caching (requires packages.lock.json files)"
         required: false
@@ -129,6 +134,7 @@ jobs:
       version: ${{ needs.release-please.outputs.version }}
       tag-name: ${{ needs.release-please.outputs.tag_name }}
       trusted-publishing: ${{ inputs.nuget-trusted-publishing }}
+      locked-mode: ${{ inputs.locked-mode }}
       cache-enabled: ${{ inputs.cache-enabled }}
       cache-dependency-path: ${{ inputs.cache-dependency-path }}
       working-directory: ${{ inputs.working-directory }}

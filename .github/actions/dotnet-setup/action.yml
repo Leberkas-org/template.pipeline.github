@@ -18,6 +18,10 @@ inputs:
     description: "Glob pattern for NuGet cache key"
     required: false
     default: "**/packages.lock.json"
+  locked-mode:
+    description: "Use --locked-mode for restore (fails if packages.lock.json is outdated)"
+    required: false
+    default: "false"
   cache-enabled:
     description: "Enable NuGet dependency caching"
     required: false
@@ -36,4 +40,4 @@ runs:
     - name: Restore dependencies
       shell: bash
       working-directory: ${{ inputs.working-directory }}
-      run: dotnet restore ${{ inputs.solution-path }}
+      run: dotnet restore ${{ inputs.locked-mode == 'true' && '--locked-mode' || '' }} ${{ inputs.solution-path }}

@@ -35,6 +35,11 @@ on:
         required: false
         type: boolean
         default: false
+      locked-mode:
+        description: "Use --locked-mode for restore (fails if packages.lock.json is outdated)"
+        required: false
+        type: boolean
+        default: false
       cache-enabled:
         description: "Enable NuGet dependency caching (requires packages.lock.json files)"
         required: false
@@ -80,6 +85,7 @@ jobs:
           global-json-file: ${{ inputs.dotnet-version-file }}
           solution-path: ${{ inputs.solution-path }}
           working-directory: ${{ inputs.working-directory }}
+          locked-mode: ${{ inputs.locked-mode && 'true' || 'false' }}
           cache-enabled: ${{ inputs.cache-enabled && 'true' || 'false' }}
           cache-dependency-path: ${{ inputs.cache-dependency-path }}
 
