@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1](https://github.com/Leberkas-org/template.pipeline.github/compare/v0.7.0...v0.7.1) (2026-05-28)
+
+
+### CI/CD
+
+* Enable LFS checkout in workflows ([1d52151](https://github.com/Leberkas-org/template.pipeline.github/commit/1d52151301c394e8a4f30883205b4cc38645f032))
+
 ## [0.7.0](https://github.com/Leberkas-org/template.pipeline.github/compare/v0.6.0...v0.7.0) (2026-05-28)
 
 
