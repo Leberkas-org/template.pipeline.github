@@ -95,6 +95,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: ${{ inputs.sonar-enabled && 0 || 1 }}
+          lfs: "true"
 
       - name: Install extra apt packages
         if: inputs.extra-apt-packages != ''
