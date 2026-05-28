@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.3](https://github.com/Leberkas-org/template.pipeline.github/compare/v0.7.2...v0.7.3) (2026-05-28)
+
+
+### CI/CD
+
+* Change default packages path to 'packages' ([e5db930](https://github.com/Leberkas-org/template.pipeline.github/commit/e5db930f117561e984f0435adfeb74b278b7ef67))
+
 ## [0.7.2](https://github.com/Leberkas-org/template.pipeline.github/compare/v0.7.1...v0.7.2) (2026-05-28)
 
 
