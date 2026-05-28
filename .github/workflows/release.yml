@@ -1,0 +1,102 @@
+name: Release & Publish
+
+on:
+  workflow_call:
+    inputs:
+      nuget-publish:
+        description: "Enable NuGet publishing"
+        required: false
+        type: boolean
+        default: false
+      docker-publish:
+        description: "Enable Docker publishing"
+        required: false
+        type: boolean
+        default: false
+      dotnet-version-file:
+        description: "Path to global.json for SDK version"
+        required: false
+        type: string
+        default: "./src/global.json"
+      solution-path:
+        description: "Path to .slnx or .sln (required if nuget-publish is true)"
+        required: false
+        type: string
+        default: ""
+      dockerfile-path:
+        description: "Path to Dockerfile"
+        required: false
+        type: string
+        default: "./Dockerfile"
+      docker-registry:
+        description: "Container registry URL"
+        required: false
+        type: string
+        default: "ghcr.io"
+      docker-image-name:
+        description: "Docker image name (required if docker-publish is true)"
+        required: false
+        type: string
+        default: ""
+      docker-platforms:
+        description: "Target platforms for Docker build"
+        required: false
+        type: string
+        default: "linux/amd64"
+    secrets:
+      nuget-api-key:
+        description: "NuGet.org API key (required if nuget-publish)"
+        required: false
+      registry-username:
+        description: "Registry username (required if docker-publish)"
+        required: false
+      registry-password:
+        description: "Registry password (required if docker-publish)"
+        required: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  packages: write
+  id-token: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      version: ${{ steps.release.outputs.version }}
+    steps:
+      - name: Run release-please
+        id: release
+        uses: googleapis/release-please-action@v5
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  nuget:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true' && inputs.nuget-publish
+    uses: Leberkas-org/template.pipeline.github/.github/workflows/nuget-publish.yml@main
+    with:
+      dotnet-version-file: ${{ inputs.dotnet-version-file }}
+      solution-path: ${{ inputs.solution-path }}
+      version: ${{ needs.release-please.outputs.version }}
+      tag-name: ${{ needs.release-please.outputs.tag_name }}
+    secrets:
+      nuget-api-key: ${{ secrets.nuget-api-key }}
+
+  docker:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true' && inputs.docker-publish
+    uses: Leberkas-org/template.pipeline.github/.github/workflows/docker-build-push.yml@main
+    with:
+      dockerfile-path: ${{ inputs.dockerfile-path }}
+      image-name: ${{ inputs.docker-image-name }}
+      registry: ${{ inputs.docker-registry }}
+      version: ${{ needs.release-please.outputs.version }}
+      platforms: ${{ inputs.docker-platforms }}
+    secrets:
+      registry-username: ${{ secrets.registry-username }}
+      registry-password: ${{ secrets.registry-password }}
