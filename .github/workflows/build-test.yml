@@ -1,0 +1,96 @@
+name: Build & Test
+
+on:
+  workflow_call:
+    inputs:
+      dotnet-version-file:
+        description: "Path to global.json for SDK version"
+        required: false
+        type: string
+        default: "./src/global.json"
+      solution-path:
+        description: "Path to .slnx or .sln file"
+        required: true
+        type: string
+      build-configuration:
+        description: "Build configuration"
+        required: false
+        type: string
+        default: "Release"
+      coverage-enabled:
+        description: "Generate code coverage reports"
+        required: false
+        type: boolean
+        default: true
+      test-result-directory:
+        description: "Directory for test results"
+        required: false
+        type: string
+        default: "testresults"
+      extra-apt-packages:
+        description: "Space-separated apt packages to install (e.g. libmsquic)"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    if: "!startsWith(github.event.head_commit.message, 'chore(main): release')"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Install extra apt packages
+        if: inputs.extra-apt-packages != ''
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ${{ inputs.extra-apt-packages }} > /dev/null
+
+      - name: Setup .NET
+        uses: Leberkas-org/template.pipeline.github/.github/actions/dotnet-setup@main
+        with:
+          global-json-file: ${{ inputs.dotnet-version-file }}
+          solution-path: ${{ inputs.solution-path }}
+
+      - name: Build
+        run: >
+          dotnet build
+          --configuration ${{ inputs.build-configuration }}
+          --no-restore
+          ${{ inputs.solution-path }}
+
+      - name: Run tests
+        run: >
+          dotnet test
+          --configuration ${{ inputs.build-configuration }}
+          --no-ansi
+          --no-build
+          --coverage
+          --coverage-output-format cobertura
+          --results-directory ${{ github.workspace }}/${{ inputs.test-result-directory }}
+          ${{ inputs.solution-path }}
+
+      - name: Generate coverage report
+        if: always() && inputs.coverage-enabled
+        uses: danielpalme/ReportGenerator-GitHub-Action@5
+        with:
+          reports: "${{ github.workspace }}/${{ inputs.test-result-directory }}/*cobertura.xml"
+          targetdir: "./coveragereport"
+          reporttypes: "MarkdownSummaryGithub"
+
+      - name: Add coverage to job summary
+        if: always() && inputs.coverage-enabled
+        run: cat ./coveragereport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
