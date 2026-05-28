@@ -52,6 +52,8 @@ jobs:
 | `docker-build-push.yml` | `workflow_call` | Build and push Docker images |
 | `release.yml` | `workflow_call` | release-please + orchestrate publish |
 | `commitlint.yml` | `workflow_call` | PR title and commit message validation |
+| `docs-build.yml` | `workflow_call` | Build VitePress/docs site (PR validation) |
+| `docs-deploy.yml` | `workflow_call` | Build + deploy docs to GitHub Pages |
 
 ## Composite Actions
 

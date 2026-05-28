@@ -166,6 +166,70 @@ jobs:
 |-------|----------|---------|-------------|
 | `commitlint-config-file` | no | `commitlint.config.mjs` | Path to commitlint config |
 
+---
+
+### docs-build.yml
+
+Build a VitePress (or other Node.js-based) docs site on PRs for validation.
+
+**Usage:**
+```yaml
+jobs:
+  docs:
+    uses: Leberkas-org/template.pipeline.github/.github/workflows/docs-build.yml@v1
+    with:
+      docs-directory: docs
+```
+
+**Inputs:**
+| Input | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `docs-directory` | no | `docs` | Working directory containing package.json |
+| `node-version` | no | `22` | Node.js version |
+| `build-command` | no | `npm run build` | Build script |
+
+---
+
+### docs-deploy.yml
+
+Build a docs site and deploy to GitHub Pages. Typically called by `release.yml`, not directly.
+
+**Inputs:**
+| Input | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `docs-directory` | no | `docs` | Working directory containing package.json |
+| `node-version` | no | `22` | Node.js version |
+| `build-command` | no | `npm run build` | Build script |
+| `output-directory` | no | `docs/.vitepress/dist` | Path to built site output |
+
+---
+
+### release.yml — Docs Deploy Option
+
+Add `docs-deploy: true` to the release workflow to deploy docs on each release:
+
+```yaml
+jobs:
+  release:
+    uses: Leberkas-org/template.pipeline.github/.github/workflows/release.yml@v1
+    with:
+      nuget-publish: true
+      docs-deploy: true
+      docs-directory: docs
+      solution-path: ./src/MyProject.slnx
+    secrets:
+      nuget-api-key: ${{ secrets.NUGET_SECRET }}
+```
+
+Additional release.yml inputs for docs:
+
+| Input | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `docs-deploy` | no | `false` | Enable docs deploy on release |
+| `docs-directory` | no | `docs` | Docs working directory |
+| `docs-build-command` | no | `npm run build` | Build script |
+| `docs-output-directory` | no | `docs/.vitepress/dist` | Built site path |
+
 ## Starter Files
 
 Copy these from `starter/` to your repo root:
