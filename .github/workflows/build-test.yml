@@ -149,12 +149,12 @@ jobs:
         uses: danielpalme/ReportGenerator-GitHub-Action@5
         with:
           reports: "${{ github.workspace }}/${{ inputs.test-result-directory }}/*cobertura.xml"
-          targetdir: "./coveragereport"
+          targetdir: "${{ github.workspace }}/coveragereport"
           reporttypes: "MarkdownSummaryGithub"
 
       - name: Add coverage to job summary
         if: always() && inputs.coverage-enabled
-        run: cat ./coveragereport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
+        run: cat ${{ github.workspace }}/coveragereport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
 
       - name: End SonarCloud analysis
         if: inputs.sonar-enabled
