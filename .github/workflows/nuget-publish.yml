@@ -45,6 +45,11 @@ on:
         required: false
         type: string
         default: "**/packages.lock.json"
+      working-directory:
+        description: "Working directory for build and pack commands (should contain global.json)"
+        required: false
+        type: string
+        default: "./src"
     secrets:
       nuget-api-key:
         description: "NuGet.org API key (not required when trusted-publishing is true)"
@@ -60,6 +65,9 @@ permissions:
 jobs:
   nuget-build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -70,7 +78,7 @@ jobs:
         uses: Leberkas-org/template.pipeline.github/.github/actions/dotnet-setup@main
         with:
           global-json-file: ${{ inputs.dotnet-version-file }}
-          solution-path: ${{ inputs.solution-path }}
+          solution-path: ${{ inputs.working-directory }}/${{ inputs.solution-path }}
           cache-enabled: ${{ inputs.cache-enabled && 'true' || 'false' }}
           cache-dependency-path: ${{ inputs.cache-dependency-path }}
 

@@ -25,20 +25,20 @@ on:
 
 jobs:
   lint:
-    uses: Leberkas-org/template.pipeline.github/.github/workflows/commitlint.yml@v1
+    uses: Leberkas-org/template.pipeline.github/.github/workflows/commitlint.yml@v0
 
   build:
-    uses: Leberkas-org/template.pipeline.github/.github/workflows/build-test.yml@v1
+    uses: Leberkas-org/template.pipeline.github/.github/workflows/build-test.yml@v0
     with:
-      solution-path: ./src/MyProject.slnx
+      solution-path: MyProject.slnx
 
   release:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs: build
-    uses: Leberkas-org/template.pipeline.github/.github/workflows/release.yml@v1
+    uses: Leberkas-org/template.pipeline.github/.github/workflows/release.yml@v0
     with:
       nuget-publish: true
-      solution-path: ./src/MyProject.slnx
+      solution-path: MyProject.slnx
     secrets:
       nuget-api-key: ${{ secrets.NUGET_SECRET }}
 ```

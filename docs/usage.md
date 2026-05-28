@@ -18,16 +18,17 @@ Build and test a .NET solution with optional code coverage.
 ```yaml
 jobs:
   build:
-    uses: Leberkas-org/template.pipeline.github/.github/workflows/build-test.yml@v1
+    uses: Leberkas-org/template.pipeline.github/.github/workflows/build-test.yml@v0
     with:
-      solution-path: ./src/MyProject.slnx
+      solution-path: MyProject.slnx
 ```
 
 **Inputs:**
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
 | `dotnet-version-file` | no | `./src/global.json` | Path to global.json |
-| `solution-path` | **yes** | — | Path to .slnx or .sln |
+| `solution-path` | no | `*.slnx` | Path to .slnx or .sln (relative to `working-directory`) |
+| `working-directory` | no | `./src` | Working directory for build and test commands (should contain global.json) |
 | `build-configuration` | no | `Release` | Build configuration |
 | `coverage-enabled` | no | `true` | Generate coverage reports |
 | `test-result-directory` | no | `testresults` | Test output directory |
@@ -42,18 +43,39 @@ jobs:
 |--------|----------|-------------|
 | `sonar-token` | if sonar-enabled | SonarCloud authentication token |
 
+**Usage with extra apt packages:**
+```yaml
+jobs:
+  build:
+    uses: Leberkas-org/template.pipeline.github/.github/workflows/build-test.yml@v0
+    with:
+      solution-path: TurboHTTP.slnx
+      extra-apt-packages: libmsquic
+```
+
 **Usage with SonarCloud:**
 ```yaml
 jobs:
   build:
-    uses: Leberkas-org/template.pipeline.github/.github/workflows/build-test.yml@v1
+    uses: Leberkas-org/template.pipeline.github/.github/workflows/build-test.yml@v0
     with:
-      solution-path: ./src/MyProject.slnx
+      solution-path: MyProject.slnx
       sonar-enabled: true
       sonar-project-key: my-org_my-project
       sonar-organization: my-org
     secrets:
       sonar-token: ${{ secrets.SONAR_TOKEN }}
+```
+
+**Usage with custom working directory:**
+```yaml
+jobs:
+  build:
+    uses: Leberkas-org/template.pipeline.github/.github/workflows/build-test.yml@v0
+    with:
+      solution-path: MyProject.slnx
+      working-directory: ./custom/path
+      dotnet-version-file: ./custom/path/global.json
 ```
 
 ---
@@ -66,12 +88,15 @@ Pack and publish NuGet packages. Typically called by `release.yml`, not directly
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
 | `dotnet-version-file` | no | `./src/global.json` | Path to global.json |
-| `solution-path` | **yes** | — | Path to .slnx or .sln |
+| `solution-path` | **yes** | — | Path to .slnx or .sln (relative to `working-directory`) |
+| `working-directory` | no | `./src` | Working directory for build and pack commands (should contain global.json) |
 | `version` | **yes** | — | SemVer version |
 | `tag-name` | **yes** | — | Git tag for release attachment |
 | `package-output-directory` | no | `./packages` | Output directory |
 | `nuget-source` | no | `https://api.nuget.org/v3/index.json` | NuGet feed URL |
 | `trusted-publishing` | no | `false` | Use OIDC trusted publishing instead of API key |
+| `cache-enabled` | no | `true` | Enable NuGet dependency caching |
+| `cache-dependency-path` | no | `**/packages.lock.json` | Glob pattern for NuGet cache key |
 
 **Secrets:**
 | Secret | Required | Description |
@@ -106,17 +131,16 @@ Build and push Docker images. Typically called by `release.yml`, not directly.
 
 ### release.yml
 
-Orchestrates release-please, NuGet publishing, and Docker publishing.
+Orchestrates release-please, NuGet publishing, Docker publishing, and docs deployment.
 
 **Usage (NuGet with API key):**
 ```yaml
 jobs:
   release:
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    uses: Leberkas-org/template.pipeline.github/.github/workflows/release.yml@v1
+    uses: Leberkas-org/template.pipeline.github/.github/workflows/release.yml@v0
     with:
       nuget-publish: true
-      solution-path: ./src/MyProject.slnx
+      solution-path: MyProject.slnx
     secrets:
       nuget-api-key: ${{ secrets.NUGET_SECRET }}
 ```
@@ -125,12 +149,11 @@ jobs:
 ```yaml
 jobs:
   release:
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    uses: Leberkas-org/template.pipeline.github/.github/workflows/release.yml@v1
+    uses: Leberkas-org/template.pipeline.github/.github/workflows/release.yml@v0
     with:
       nuget-publish: true
       nuget-trusted-publishing: true
-      solution-path: ./src/MyProject.slnx
+      solution-path: MyProject.slnx
     secrets:
       nuget-username: ${{ secrets.NUGET_USER }}
 ```
@@ -139,8 +162,7 @@ jobs:
 ```yaml
 jobs:
   release:
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    uses: Leberkas-org/template.pipeline.github/.github/workflows/release.yml@v1
+    uses: Leberkas-org/template.pipeline.github/.github/workflows/release.yml@v0
     with:
       docker-publish: true
       docker-image-name: my-service
@@ -151,16 +173,15 @@ jobs:
       registry-password: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-**Usage (Both):**
+**Usage (NuGet + Docker):**
 ```yaml
 jobs:
   release:
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    uses: Leberkas-org/template.pipeline.github/.github/workflows/release.yml@v1
+    uses: Leberkas-org/template.pipeline.github/.github/workflows/release.yml@v0
     with:
       nuget-publish: true
       docker-publish: true
-      solution-path: ./src/MyProject.slnx
+      solution-path: MyProject.slnx
       docker-image-name: my-service
     secrets:
       nuget-api-key: ${{ secrets.NUGET_SECRET }}
@@ -174,12 +195,19 @@ jobs:
 | `nuget-publish` | no | `false` | Enable NuGet publishing |
 | `nuget-trusted-publishing` | no | `false` | Use OIDC trusted publishing |
 | `docker-publish` | no | `false` | Enable Docker publishing |
+| `docs-deploy` | no | `false` | Enable docs deploy on release |
 | `dotnet-version-file` | no | `./src/global.json` | Path to global.json |
-| `solution-path` | no | `""` | Path to .slnx/.sln |
+| `solution-path` | no | `""` | Path to .slnx/.sln (relative to `working-directory`) |
+| `working-directory` | no | `./src` | Working directory for build commands (should contain global.json) |
 | `dockerfile-path` | no | `./Dockerfile` | Path to Dockerfile |
 | `docker-registry` | no | `ghcr.io` | Container registry |
 | `docker-image-name` | no | `""` | Docker image name |
 | `docker-platforms` | no | `linux/amd64` | Target platforms |
+| `docs-directory` | no | `docs` | Docs working directory |
+| `docs-build-command` | no | `npm run build` | Build script |
+| `docs-output-directory` | no | `docs/.vitepress/dist` | Built site path |
+| `cache-enabled` | no | `true` | Enable NuGet dependency caching |
+| `cache-dependency-path` | no | `**/packages.lock.json` | Glob pattern for NuGet cache key |
 
 **Secrets:**
 | Secret | Required | Description |
@@ -191,41 +219,6 @@ jobs:
 
 ---
 
-### sonar.yml
-
-Run SonarCloud analysis with code coverage integration.
-
-**Usage:**
-```yaml
-jobs:
-  sonar:
-    uses: Leberkas-org/template.pipeline.github/.github/workflows/sonar.yml@v1
-    with:
-      solution-path: ./src/MyProject.slnx
-      sonar-project-key: my-org_my-project
-      sonar-organization: my-org
-    secrets:
-      sonar-token: ${{ secrets.SONAR_TOKEN }}
-```
-
-**Inputs:**
-| Input | Required | Default | Description |
-|-------|----------|---------|-------------|
-| `dotnet-version-file` | no | `./src/global.json` | Path to global.json |
-| `solution-path` | **yes** | — | Path to .slnx or .sln |
-| `sonar-project-key` | **yes** | — | SonarCloud project key |
-| `sonar-organization` | **yes** | — | SonarCloud organization |
-| `build-configuration` | no | `Release` | Build configuration |
-| `test-result-directory` | no | `testresults` | Test output directory |
-| `extra-apt-packages` | no | `""` | Extra apt packages (e.g. `libmsquic`) |
-
-**Secrets:**
-| Secret | Required | Description |
-|--------|----------|-------------|
-| `sonar-token` | **yes** | SonarCloud authentication token |
-
----
-
 ### commitlint.yml
 
 Validate PR titles and commit messages.
@@ -234,7 +227,7 @@ Validate PR titles and commit messages.
 ```yaml
 jobs:
   lint:
-    uses: Leberkas-org/template.pipeline.github/.github/workflows/commitlint.yml@v1
+    uses: Leberkas-org/template.pipeline.github/.github/workflows/commitlint.yml@v0
 ```
 
 **Inputs:**
@@ -252,9 +245,7 @@ Build a VitePress (or other Node.js-based) docs site on PRs for validation.
 ```yaml
 jobs:
   docs:
-    uses: Leberkas-org/template.pipeline.github/.github/workflows/docs-build.yml@v1
-    with:
-      docs-directory: docs
+    uses: Leberkas-org/template.pipeline.github/.github/workflows/docs-build.yml@v0
 ```
 
 **Inputs:**
@@ -287,24 +278,14 @@ Add `docs-deploy: true` to the release workflow to deploy docs on each release:
 ```yaml
 jobs:
   release:
-    uses: Leberkas-org/template.pipeline.github/.github/workflows/release.yml@v1
+    uses: Leberkas-org/template.pipeline.github/.github/workflows/release.yml@v0
     with:
       nuget-publish: true
       docs-deploy: true
-      docs-directory: docs
-      solution-path: ./src/MyProject.slnx
+      solution-path: MyProject.slnx
     secrets:
       nuget-api-key: ${{ secrets.NUGET_SECRET }}
 ```
-
-Additional release.yml inputs for docs:
-
-| Input | Required | Default | Description |
-|-------|----------|---------|-------------|
-| `docs-deploy` | no | `false` | Enable docs deploy on release |
-| `docs-directory` | no | `docs` | Docs working directory |
-| `docs-build-command` | no | `npm run build` | Build script |
-| `docs-output-directory` | no | `docs/.vitepress/dist` | Built site path |
 
 ## Starter Files
 
@@ -318,10 +299,10 @@ Copy these from `starter/` to your repo root:
 
 ## Versioning
 
-This library uses Git tags for versioning (`v1`, `v1.0.0`).
+This library uses Git tags for versioning (`v0`, `v0.3.0`).
 
-- Pin to **major tag** for stability: `@v1`
-- Pin to **exact tag** for reproducibility: `@v1.0.0`
+- Pin to **major tag** for stability: `@v0`
+- Pin to **exact tag** for reproducibility: `@v0.3.0`
 - Pin to **branch** for development: `@main`
 
 ## Commit Convention

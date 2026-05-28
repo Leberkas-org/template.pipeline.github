@@ -78,6 +78,11 @@ on:
         required: false
         type: string
         default: "**/packages.lock.json"
+      working-directory:
+        description: "Working directory for build commands (should contain global.json)"
+        required: false
+        type: string
+        default: "./src"
     secrets:
       nuget-api-key:
         description: "NuGet.org API key (required if nuget-publish without trusted publishing)"
@@ -126,6 +131,7 @@ jobs:
       trusted-publishing: ${{ inputs.nuget-trusted-publishing }}
       cache-enabled: ${{ inputs.cache-enabled }}
       cache-dependency-path: ${{ inputs.cache-dependency-path }}
+      working-directory: ${{ inputs.working-directory }}
     secrets:
       nuget-api-key: ${{ secrets.nuget-api-key }}
       nuget-username: ${{ secrets.nuget-username }}
