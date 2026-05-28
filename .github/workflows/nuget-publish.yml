@@ -24,7 +24,7 @@ on:
         description: "Output directory for .nupkg files"
         required: false
         type: string
-        default: "./packages"
+        default: "packages"
       nuget-source:
         description: "NuGet feed URL"
         required: false
