@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/Leberkas-org/template.pipeline.github/compare/v0.4.0...v0.5.0) (2026-05-28)
+
+
+### Features
+
+* **ci:** Add working directory input to workflows ([61c8398](https://github.com/Leberkas-org/template.pipeline.github/commit/61c8398fe37329091564971453e5c4005b71da3b))
+
 ## [0.4.0](https://github.com/Leberkas-org/template.pipeline.github/compare/v0.3.0...v0.4.0) (2026-05-28)
 
 
