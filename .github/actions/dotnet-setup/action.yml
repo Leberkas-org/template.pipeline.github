@@ -7,8 +7,13 @@ inputs:
     required: false
     default: "./src/global.json"
   solution-path:
-    description: "Path to .slnx or .sln file"
-    required: true
+    description: "Path to .slnx or .sln file (relative to working-directory)"
+    required: false
+    default: "*.slnx"
+  working-directory:
+    description: "Working directory for restore (should contain global.json)"
+    required: false
+    default: "./src"
   cache-dependency-path:
     description: "Glob pattern for NuGet cache key"
     required: false
@@ -30,4 +35,5 @@ runs:
 
     - name: Restore dependencies
       shell: bash
+      working-directory: ${{ inputs.working-directory }}
       run: dotnet restore ${{ inputs.solution-path }}

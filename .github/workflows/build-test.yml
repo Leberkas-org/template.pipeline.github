@@ -101,7 +101,8 @@ jobs:
         uses: Leberkas-org/template.pipeline.github/.github/actions/dotnet-setup@main
         with:
           global-json-file: ${{ inputs.dotnet-version-file }}
-          solution-path: ${{ inputs.working-directory }}/${{ inputs.solution-path }}
+          solution-path: ${{ inputs.solution-path }}
+          working-directory: ${{ inputs.working-directory }}
           cache-enabled: ${{ inputs.cache-enabled && 'true' || 'false' }}
           cache-dependency-path: ${{ inputs.cache-dependency-path }}
 
