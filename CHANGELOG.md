@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/Leberkas-org/template.pipeline.github/compare/v0.3.0...v0.4.0) (2026-05-28)
+
+
+### Features
+
+* **ci:** Make build context configurable ([0941ebc](https://github.com/Leberkas-org/template.pipeline.github/commit/0941ebc0fbe43e7227c4e4c1d83c63ed7da1a2a9))
+
 ## [0.3.0](https://github.com/Leberkas-org/template.pipeline.github/compare/v0.2.0...v0.3.0) (2026-05-28)
 
 
