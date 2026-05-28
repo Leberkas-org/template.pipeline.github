@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.0](https://github.com/Leberkas-org/template.pipeline.github/compare/v0.2.0...v0.3.0) (2026-05-28)
+
+
+### Features
+
+* Add SonarCloud integration to CI ([8bc3e3a](https://github.com/Leberkas-org/template.pipeline.github/commit/8bc3e3a8d4eb35014671f353961336bdc94672bd))
+* make NuGet caching configurable across all workflows ([aca6486](https://github.com/Leberkas-org/template.pipeline.github/commit/aca64867099e910df3cc3270e06fb96191eb3f7d))
+
 ## [0.2.0](https://github.com/Leberkas-org/template.pipeline.github/compare/v0.1.0...v0.2.0) (2026-05-28)
 
 
