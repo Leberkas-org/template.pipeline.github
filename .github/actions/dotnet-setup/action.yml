@@ -1,0 +1,29 @@
+name: ".NET Setup"
+description: "Install .NET SDK from global.json, configure NuGet caching, and restore dependencies"
+
+inputs:
+  global-json-file:
+    description: "Path to global.json for SDK version pinning"
+    required: false
+    default: "./src/global.json"
+  solution-path:
+    description: "Path to .slnx or .sln file"
+    required: true
+  cache-dependency-path:
+    description: "Glob pattern for NuGet cache key"
+    required: false
+    default: "**/packages.lock.json"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install .NET SDK
+      uses: actions/setup-dotnet@v5
+      with:
+        global-json-file: ${{ inputs.global-json-file }}
+        cache: true
+        cache-dependency-path: ${{ inputs.cache-dependency-path }}
+
+    - name: Restore dependencies
+      shell: bash
+      run: dotnet restore ${{ inputs.solution-path }}
