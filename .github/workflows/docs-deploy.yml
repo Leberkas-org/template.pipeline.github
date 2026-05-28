@@ -1,0 +1,78 @@
+name: Docs Deploy
+
+on:
+  workflow_call:
+    inputs:
+      docs-directory:
+        description: "Working directory for docs (contains package.json)"
+        required: false
+        type: string
+        default: "docs"
+      node-version:
+        description: "Node.js version"
+        required: false
+        type: string
+        default: "22"
+      build-command:
+        description: "npm script to build the docs"
+        required: false
+        type: string
+        default: "npm run build"
+      output-directory:
+        description: "Path to built site output (relative to repo root)"
+        required: false
+        type: string
+        default: "docs/.vitepress/dist"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: docs-deploy
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.docs-directory }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          lfs: "true"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: "npm"
+          cache-dependency-path: ${{ inputs.docs-directory }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build site
+        run: ${{ inputs.build-command }}
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: ${{ inputs.output-directory }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

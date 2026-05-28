@@ -1,0 +1,54 @@
+name: Docs Build
+
+on:
+  workflow_call:
+    inputs:
+      docs-directory:
+        description: "Working directory for docs (contains package.json)"
+        required: false
+        type: string
+        default: "docs"
+      node-version:
+        description: "Node.js version"
+        required: false
+        type: string
+        default: "22"
+      build-command:
+        description: "npm script to build the docs"
+        required: false
+        type: string
+        default: "npm run build"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.docs-directory }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          lfs: "true"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: "npm"
+          cache-dependency-path: ${{ inputs.docs-directory }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build site
+        run: ${{ inputs.build-command }}

@@ -13,6 +13,26 @@ on:
         required: false
         type: boolean
         default: false
+      docs-deploy:
+        description: "Enable docs build and deploy to GitHub Pages on release"
+        required: false
+        type: boolean
+        default: false
+      docs-directory:
+        description: "Working directory for docs (contains package.json)"
+        required: false
+        type: string
+        default: "docs"
+      docs-build-command:
+        description: "npm script to build the docs"
+        required: false
+        type: string
+        default: "npm run build"
+      docs-output-directory:
+        description: "Path to built site output (relative to repo root)"
+        required: false
+        type: string
+        default: "docs/.vitepress/dist"
       dotnet-version-file:
         description: "Path to global.json for SDK version"
         required: false
@@ -58,6 +78,7 @@ permissions:
   contents: write
   pull-requests: write
   packages: write
+  pages: write
   id-token: write
 
 jobs:
@@ -100,3 +121,12 @@ jobs:
     secrets:
       registry-username: ${{ secrets.registry-username }}
       registry-password: ${{ secrets.registry-password }}
+
+  docs:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true' && inputs.docs-deploy
+    uses: Leberkas-org/template.pipeline.github/.github/workflows/docs-deploy.yml@main
+    with:
+      docs-directory: ${{ inputs.docs-directory }}
+      build-command: ${{ inputs.docs-build-command }}
+      output-directory: ${{ inputs.docs-output-directory }}
