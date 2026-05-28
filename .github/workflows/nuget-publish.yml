@@ -30,13 +30,22 @@ on:
         required: false
         type: string
         default: "https://api.nuget.org/v3/index.json"
+      trusted-publishing:
+        description: "Use OIDC trusted publishing instead of API key"
+        required: false
+        type: boolean
+        default: false
     secrets:
       nuget-api-key:
-        description: "NuGet.org API key"
-        required: true
+        description: "NuGet.org API key (not required when trusted-publishing is true)"
+        required: false
+      nuget-username:
+        description: "NuGet.org username (required when trusted-publishing is true)"
+        required: false
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
   nuget-build:
@@ -91,7 +100,23 @@ jobs:
       - name: Install .NET
         uses: actions/setup-dotnet@v5
 
-      - name: Push to NuGet
+      - name: NuGet login (trusted publishing)
+        if: inputs.trusted-publishing
+        uses: NuGet/login@v1
+        with:
+          user: ${{ secrets.nuget-username }}
+
+      - name: Push to NuGet (trusted publishing)
+        if: inputs.trusted-publishing
+        run: >
+          dotnet nuget push
+          ${{ inputs.package-output-directory }}/*.nupkg
+          --source ${{ inputs.nuget-source }}
+          --api-key ${{ env.NUGET_API_KEY }}
+          --skip-duplicate
+
+      - name: Push to NuGet (API key)
+        if: ${{ !inputs.trusted-publishing }}
         run: >
           dotnet nuget push
           ${{ inputs.package-output-directory }}/*.nupkg

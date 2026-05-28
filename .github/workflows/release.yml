@@ -8,6 +8,11 @@ on:
         required: false
         type: boolean
         default: false
+      nuget-trusted-publishing:
+        description: "Use OIDC trusted publishing instead of API key"
+        required: false
+        type: boolean
+        default: false
       docker-publish:
         description: "Enable Docker publishing"
         required: false
@@ -65,7 +70,10 @@ on:
         default: "linux/amd64"
     secrets:
       nuget-api-key:
-        description: "NuGet.org API key (required if nuget-publish)"
+        description: "NuGet.org API key (required if nuget-publish without trusted publishing)"
+        required: false
+      nuget-username:
+        description: "NuGet.org username (required if nuget-trusted-publishing)"
         required: false
       registry-username:
         description: "Registry username (required if docker-publish)"
@@ -105,8 +113,10 @@ jobs:
       solution-path: ${{ inputs.solution-path }}
       version: ${{ needs.release-please.outputs.version }}
       tag-name: ${{ needs.release-please.outputs.tag_name }}
+      trusted-publishing: ${{ inputs.nuget-trusted-publishing }}
     secrets:
       nuget-api-key: ${{ secrets.nuget-api-key }}
+      nuget-username: ${{ secrets.nuget-username }}
 
   docker:
     needs: release-please

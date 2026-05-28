@@ -48,11 +48,13 @@ Pack and publish NuGet packages. Typically called by `release.yml`, not directly
 | `tag-name` | **yes** | — | Git tag for release attachment |
 | `package-output-directory` | no | `./packages` | Output directory |
 | `nuget-source` | no | `https://api.nuget.org/v3/index.json` | NuGet feed URL |
+| `trusted-publishing` | no | `false` | Use OIDC trusted publishing instead of API key |
 
 **Secrets:**
 | Secret | Required | Description |
 |--------|----------|-------------|
-| `nuget-api-key` | **yes** | NuGet.org API key |
+| `nuget-api-key` | if not trusted-publishing | NuGet.org API key |
+| `nuget-username` | if trusted-publishing | NuGet.org username |
 
 ---
 
@@ -83,7 +85,7 @@ Build and push Docker images. Typically called by `release.yml`, not directly.
 
 Orchestrates release-please, NuGet publishing, and Docker publishing.
 
-**Usage (NuGet only):**
+**Usage (NuGet with API key):**
 ```yaml
 jobs:
   release:
@@ -94,6 +96,20 @@ jobs:
       solution-path: ./src/MyProject.slnx
     secrets:
       nuget-api-key: ${{ secrets.NUGET_SECRET }}
+```
+
+**Usage (NuGet with trusted publishing):**
+```yaml
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    uses: Leberkas-org/template.pipeline.github/.github/workflows/release.yml@v1
+    with:
+      nuget-publish: true
+      nuget-trusted-publishing: true
+      solution-path: ./src/MyProject.slnx
+    secrets:
+      nuget-username: ${{ secrets.NUGET_USER }}
 ```
 
 **Usage (Docker only):**
@@ -133,6 +149,7 @@ jobs:
 | Input | Required | Default | Description |
 |-------|----------|---------|-------------|
 | `nuget-publish` | no | `false` | Enable NuGet publishing |
+| `nuget-trusted-publishing` | no | `false` | Use OIDC trusted publishing |
 | `docker-publish` | no | `false` | Enable Docker publishing |
 | `dotnet-version-file` | no | `./src/global.json` | Path to global.json |
 | `solution-path` | no | `""` | Path to .slnx/.sln |
@@ -144,7 +161,8 @@ jobs:
 **Secrets:**
 | Secret | Required | Description |
 |--------|----------|-------------|
-| `nuget-api-key` | if nuget-publish | NuGet API key |
+| `nuget-api-key` | if nuget-publish without trusted publishing | NuGet API key |
+| `nuget-username` | if nuget-trusted-publishing | NuGet.org username |
 | `registry-username` | if docker-publish | Registry username |
 | `registry-password` | if docker-publish | Registry password |
 
