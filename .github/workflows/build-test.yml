@@ -9,9 +9,10 @@ on:
         type: string
         default: "./src/global.json"
       solution-path:
-        description: "Path to .slnx or .sln file"
-        required: true
+        description: "Path to .slnx or .sln file (relative to working-directory)"
+        required: false
         type: string
+        default: "*.slnx"
       build-configuration:
         description: "Build configuration"
         required: false
@@ -57,6 +58,11 @@ on:
         required: false
         type: string
         default: ""
+      working-directory:
+        description: "Working directory for build and test commands (should contain global.json)"
+        required: false
+        type: string
+        default: "./src"
     secrets:
       sonar-token:
         description: "SonarCloud authentication token (required if sonar-enabled)"
@@ -75,6 +81,9 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     if: "!startsWith(github.event.head_commit.message, 'chore(main): release')"
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
 
     steps:
       - name: Checkout
@@ -92,7 +101,7 @@ jobs:
         uses: Leberkas-org/template.pipeline.github/.github/actions/dotnet-setup@main
         with:
           global-json-file: ${{ inputs.dotnet-version-file }}
-          solution-path: ${{ inputs.solution-path }}
+          solution-path: ${{ inputs.working-directory }}/${{ inputs.solution-path }}
           cache-enabled: ${{ inputs.cache-enabled && 'true' || 'false' }}
           cache-dependency-path: ${{ inputs.cache-dependency-path }}
 
@@ -126,7 +135,7 @@ jobs:
           --coverage
           --coverage-output-format cobertura
           --results-directory ${{ github.workspace }}/${{ inputs.test-result-directory }}
-          ${{ inputs.solution-path }}
+          --solution ${{ inputs.solution-path }}
 
       - name: Generate coverage report
         if: always() && inputs.coverage-enabled
